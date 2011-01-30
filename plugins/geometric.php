@@ -10,14 +10,13 @@ class Geometric {
 	}
 	
 	function rectangle_return ($options = null, $pic_img = null) {
-		if (!is_array($options)) $options = pic_css_paser($options);
+		if (!is_array($options)) $options = $this->pic->css_paser($options);
 		
-		$default_options = array('width' => $pic_img['width'], 'height' => $pic_img['height'], 'opacity' => 100);
-		$options = array_merge($default_options, $options);
+		$options = array_merge(array('width' => $pic_img['width'], 'height' => $pic_img['height'], 'opacity' => 100), $options);
 		
-		$pos = $this->position($options, $pic_img);
+		$pos = $this->pic->position($options, $pic_img);
 		
-		$pic_img = $this->imagecolor($options['background'], $options['opacity'], $pic_img);
+		$pic_img = $this->pic->imagecolor($options['background'], $options['opacity'], $pic_img);
 		
 		imagefilledrectangle($pic_img['source'], $pos['x'], $pos['y'],  $pos['x'] + $options['width'], $pos['y'] + $options['height'], $pic_img['imagecolor']);
 
