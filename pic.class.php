@@ -586,13 +586,21 @@ class Pic {
 		$name = $this->filter_name($name);
 		if (!is_dir($dir = dirname($name))) mkdir($dir, $chmod, true);
 		if ($this->image($name, $qualite)) chmod($name, $chmod);
-		imagedestroy($this->img['source']);
 	}
 
-	/*
-	 * Apaga a imagem original nos arquivos temporários
+	/**
+	 * Apaga a imagem da memória
 	 */
 	function clear() {
-		unlink($this->src);
+		imagedestroy($this->img['source']);
 	}
+	
+	/**
+	 * Apaga a imagem aberta se carregada no servidor e limpa da memória
+	 */
+	function clear_all() {
+		imagedestroy($this->img['source']);
+		if (file_exists($this->src)) unlink($this->src);
+	}
+	
 }
