@@ -596,11 +596,9 @@ class Pic {
 	}
 	
 	/**
-	 * Apaga a imagem aberta se carregada no servidor e limpa da memória
+	 * Deleta a imagem aberta se carregada no servidor, por um formulário por exemplo
 	 */
-	function clear_all() {
-		imagedestroy($this->img['source']);
+	function delete() {
 		if (file_exists($this->src)) unlink($this->src);
 	}
-	
 }
