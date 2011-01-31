@@ -563,6 +563,7 @@ class Pic {
 		if (!is_null($format)) $this->img['format'] = $format;
 		header('Content-type: ' . $this->mime[$this->img['format']]);
 		$this->image(null, $qualite);
+		imagedestroy($this->img['source']);
 		exit;
 	}
 	
