@@ -1,14 +1,31 @@
 <?php
 /**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * Copyright (C) Anderson Custódio de Oliveira (@acustodioo), 2011
+ */
+
+/**
  * PIC - [P]HP [I]MG [C]SS
  *
  * Com poucas linhas de código você abre e edita imagens com PHP de forma simples e rápida usando comandos CSS.
  *
  * @author Anderson Custódio de Oliveira <acustodioo@gmail.com>
  * @link https://github.com/acustodioo/pic
- * @since Pic 0.1b
  */
-  
+ 
 define('PATH_PIC_CLASS', dirname(__FILE__) . '/');
 
 class Pic {
@@ -47,11 +64,22 @@ class Pic {
 			
 		$plugin = ucwords($plugin_class);
 		$plugin = new $plugin;
-		$plugin->pic = $this;
+
+
+		if (!isset($params[1]))
+			$plugin->pic = &$this;
+		else
+			$plugin->pic = $this;
+		
+		return call_user_func_array(array($plugin, $plugin_method), $params);
+
+		if (!isset($params[1]))
+			$plugin->pic = &$this;
+		else
+			$plugin->pic = $this;
 		
 		$return = call_user_func_array(array($plugin, $plugin_method), $params);
-		
-		if ($return) return $return; else $this->this = $plugin->pic;
+		if ($return) return $return;
 	}
 	
 	/**
@@ -61,8 +89,8 @@ class Pic {
 		$pos = array('x' => 0, 'y' => 0);
 		
 		// Definição da posição X do layer, estilo CSS usando position absolute: left ou right
-		if ($options['left'] == 'auto' or $options['right'] == 'auto')
-		$pos['x'] = (($base['width'] - $options['width']) / 2);
+		if (isset($options['left']) and $options['left'] == 'auto' or isset($options['right']) and $options['right'] == 'auto')
+			$pos['x'] = (($base['width'] - $options['width']) / 2);
 		
 		elseif (isset($options['left']))
 			$pos['x'] =  $this->percent_to_pixel($options['left'], $base['width']);
@@ -72,7 +100,7 @@ class Pic {
 			
 		
 		// Definição da posição Y do layer, estilo CSS usando position absolute: top ou bottom
-		if ($options['top'] == 'auto' or $options['bottom'] == 'auto')
+		if (isset($options['top']) and $options['top'] == 'auto' or isset($options['bottom']) and $options['bottom'] == 'auto')
 			$pos['y'] = (($base['height'] - $options['height']) / 2);
 			
 		elseif (isset($options['top']))
@@ -101,7 +129,7 @@ class Pic {
 	 */
 	function css_paser($css = null) {
 		$css = str_replace(array("\n", "\r", "\t"), null, $css);
-		$css = explode(':', str_replace(';', ':', $css));
+		$css = explode(':', rtrim(str_replace(';', ':', $css), ':'));
 		
 		for ($i = 0; $i < count($css); $i += 2)
 			$options[$css[$i]] = trim($css[$i + 1]);
@@ -597,7 +625,7 @@ class Pic {
 	}
 	
 	/**
-	 * Deleta a imagem aberta se carregada no servidor, por um formulário por exemplo
+	 * Deleta a imagem aberta pelo Pic::open
 	 */
 	function delete() {
 		if (file_exists($this->src)) unlink($this->src);

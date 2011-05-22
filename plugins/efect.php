@@ -2,9 +2,10 @@
 class Efect {
 	function __call($method, $params) {
 		if (method_exists(__CLASS__, $method . '_return')) {
-			if (is_null($params[1]))
+			if (!isset($params[1])) {
+				if (!isset($params[0])) $params[0] = null;
 				$this->pic->img = call_user_func_array(array(__CLASS__, $method . '_return'), array($params[0], $this->pic->img));
-			else
+			} else
 				return call_user_func_array(array(__CLASS__, $method . '_return'), array($params[0], $params[1]));
 		}
 	}

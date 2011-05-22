@@ -1,9 +1,10 @@
 <?php
 class Filter {
 	function __call($method, $params) {
-		if (is_null($params[1]))
+		if (!isset($params[1])) {
+			if (!isset($params[0])) $params[0] = null;
 			$this->pic->img = call_user_func_array(array(__CLASS__, 'img_filter'), array($method, $params[0], $this->pic->img));
-		else
+		} else
 			return call_user_func_array(array(__CLASS__, 'img_filter'), array($method, $params[0], $params[1]));
 	}
 	
