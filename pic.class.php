@@ -65,14 +65,6 @@ class Pic {
 		$plugin = ucwords($plugin_class);
 		$plugin = new $plugin;
 
-
-		if (!isset($params[1]))
-			$plugin->pic = &$this;
-		else
-			$plugin->pic = $this;
-		
-		return call_user_func_array(array($plugin, $plugin_method), $params);
-
 		if (!isset($params[1]))
 			$plugin->pic = &$this;
 		else
