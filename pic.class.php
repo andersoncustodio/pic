@@ -42,7 +42,7 @@ class Pic {
 	private $src = null;
 	
 	/**
-	 * Formatos permetitos
+	 * Formatos permititos
 	 */
 	private $mime = array(
 		'jpg' => 'image/jpeg',
@@ -104,7 +104,7 @@ class Pic {
 	 * Color
 	 * @link http://www.php.net/manual/en/ref.image.php#63064
 	 */
-	private function hexrgb($color = null) {
+	private function hexrgb ($color = null) {
 		if (is_null($color)) return array(255, 255, 255);
 		$color = str_replace('#', null, $color);
 		if (strlen($color) == 3) $color .= $color;
@@ -117,7 +117,7 @@ class Pic {
 	private function pixel (&$unid = null, $measure = null) {
 		if (!is_numeric($unid)) {
 			if (strrpos($unid, '%'))
-				$unid = (int) ($measure * (str_replace('%', null, $unid) / 100));
+				$unid = (int) ($measure * ((int) $unid / 100));
 			else
 				$unid = (int) $unid;
 		}
@@ -140,7 +140,7 @@ class Pic {
 	/**
 	 * Redimensionamento com varias opções
 	 */
-	public function resize($options = array()) {
+	public function resize ($options = array()) {
 		// Se definir só a largura reajusto o valor da altura para manter a proporção
 		if (isset($options['width']) and !isset($options['height'])) {
 			$this->pixel($options['width'], $this->img['width']);
@@ -225,7 +225,7 @@ class Pic {
 	/**
 	 *
 	 */
-	function flip($type = 'h'){
+	public function flip($type = 'h'){
 		$tmp = imagecreatetruecolor($this->img['width'], $this->img['height']);
 		switch($type){
 			case 'v':
@@ -255,7 +255,7 @@ class Pic {
 	/**
 	 * 
 	 */
-	function create (&$options = array()) {
+	public function create (&$options = array()) {
 		$options = array_merge(array('width' => 600, 'height' => 400,
 			'background' => 'transparent',
 			'opacity' => '100'), $options);
@@ -307,6 +307,33 @@ class Pic {
 		);
 	}
 
+	/**
+	 *
+	 */
+	public function write($string = null, $options = array()) {
+		$options = array_merge(array('color' => '#FFF', 'background' => 'transparent',
+			'opacity' => '100', 'font' => null, 'size' => '14', 'rotate' => 0), $options);
+
+		$string = utf8_decode($string);
+		$this->pixel($options['size'], $this->img['height']);
+
+		$bbox = imagettfbbox($options['size'], 0, $options['font'], $string);
+		$options['width'] = $bbox[2];
+		$options['height'] = $options['size'];
+
+		if ($options['background'] != 'transparent')
+			$this->geometric('rectangle', $options);
+
+		$pos = $this->position($options, $this->img);
+		$pos['y'] += $options['size'];
+
+		$options['background'] = $options['color'];
+		$this->imagecolor($options);
+
+		imagettftext($this->img['source'], $options['size'], $options['rotate'],
+			$pos['x'], $pos['y'], $this->img['imagecolor'], $options['font'], $string);
+	}
+	
 	/**
 	 * 
 	 */
@@ -406,7 +433,7 @@ class Pic {
 	}
 	
 	/**
-	 * Abre imagem pra edição
+	 * Abre imagem para edição
 	 */
 	public function open($src = null) {
 		if (!is_null($src)) $this->src = $src;
@@ -461,25 +488,31 @@ class Pic {
 	/**
 	 * 
 	 */
-	public function filter ($filter = null, $options = array()) {
-		switch ($this->filters[$filter]) {
+	public function filter ($filtertype = null, $arg1 = null, $arg2 = null, $arg3 = null, $arg4 = null) {
+		switch ($this->filters[$filtertype]) {
 			case IMG_FILTER_COLORIZE:
-				imagefilter($this->img['source'], $this->filters[$filter],
-					$options[0], $options[1], $options[2], $options[3]);
+				imagefilter($this->img['source'], $this->filters[$filtertype], $arg1, $arg2, $arg3, $arg4);
 			break;
 			
 			case IMG_FILTER_PIXELATE:
-				imagefilter($this->img['source'], $this->filters[$filter], $options[0], $options[1]);
+				imagefilter($this->img['source'], $this->filters[$filtertype], $arg1, $arg2);
 			break;
 			
 			case IMG_FILTER_BRIGHTNESS:
 			case IMG_FILTER_CONTRAST:
 			case IMG_FILTER_SMOOTH:
-				imagefilter($this->img['source'], $this->filters[$filter], $options[0]);
+				imagefilter($this->img['source'], $this->filters[$filtertype], $arg1);
+			break;
+			
+			case IMG_FILTER_NEGATE:
+				imagefilter($this->img['source'], $this->filters[$filtertype]);
 			break;
 			
 			default:
-				imagefilter($this->img['source'], $this->filters[$filter]);
+				if (is_null($arg1)) $arg1 = 1;
+
+				for ($i = 0; $i < $arg1; $i++)
+					imagefilter($this->img['source'], $this->filters[$filtertype]);
 			break;
 		}
 	}
@@ -492,10 +525,10 @@ class Pic {
 			case 'rectangle':
 				$options = array_merge(array('width' => '50%', 'height' => '50%',
 					'background' => '#FFF', 'opacity' => 100), $options); 
-				
+
 				$this->pixel($options['width'], $this->img['width']);
 				$this->pixel($options['height'], $this->img['height']);
-				
+
 				$pos = $this->position($options, $this->img);
 				$this->imagecolor($options);
 				
@@ -513,12 +546,12 @@ class Pic {
 		switch ($efect) {
 			case 'sepia':
 				$this->filter('grayscale');
-				$this->filter('colorize', array(90, 60, 40));
+				$this->filter('colorize', 90, 60, 40);
 			break;
 			case 'drawing':
 				$this->filter('grayscale');
 				$this->filter('edgedetect');
-				$this->filter('brightness', array(120));
+				$this->filter('brightness', 120);
 			break;
 		}
 	}
@@ -538,9 +571,8 @@ class Pic {
 	 * Download da imagem
 	 */
 	public function download($name = null, $qualite = 90) {
-		$name = $this->filter_name($name);
 		header('Content-type: ' . $this->mime[$this->img['format']]);
-		header('Content-Disposition: attachment; filename="' . $name . '"');
+		header('Content-Disposition: attachment; filename="' . $this->filter_name($name) . '"');
 		readfile($this->image(null, $qualite));
 		imagedestroy($this->img['source']);
 		exit;
