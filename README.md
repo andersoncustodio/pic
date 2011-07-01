@@ -48,12 +48,22 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 	$image->display();
 
 ## Camadas
+
+### Caminho direto
+
 	$image = new Pic;
 	$image->open('imagem.jpg');
 	$image->layer('logo.png', array('right' => '5px', 'bottom' => '5px'));
+	$image->display();
+
+### Outra imagem aberta pelo Pic
+
+	$image = new Pic;
+	$image->open('imagem.jpg');
 
 	$layer = new Pic;
 	$layer->open('logo.jpg');
+
 	$image->layer($layer->img, array('left' => '5px', 'top' => '5px'));
 
 	$image->display();
@@ -112,37 +122,47 @@ Baixe as fontes que serão usadas e indique o caminho completo, ex: `'font' => '
 $this->filter($filtertype [, int $arg1 [, int $arg2 [, int $arg3 [, int $arg4 ]]]]);
 
 ### filtertype
-*negate*: Reverses all colors of the image.
-*grayscale*: Converts the image into grayscale.
-*brightness*: Changes the brightness of the image. Use arg1 to set the level of brightness.
-*contrast*: Changes the contrast of the image. Use arg1 to set the level of contrast.
-*colorize*: Like IMG_FILTER_GRAYSCALE, except you can specify the color. Use arg1, arg2 and arg3 in the form of red, blue, green and arg4 for the alpha channel. The range for each color is 0 to 255.
-*edgedetect*: Uses edge detection to highlight the edges in the image.
-*emboss*: Embosses the image.
-*gaussian-blur*: Blurs the image using the Gaussian method.
-*selective-blur*: Blurs the image.
-*mean-removal*: Uses mean removal to achieve a "sketchy" effect.
-*smooth*: Makes the image smoother. Use arg1 to set the level of smoothness.
-*pixelate*: Applies pixelation effect to the image, use arg1 to set the block size and arg2 to set the pixelation effect mode.
+<table>
+<tr> <th>negate <td>Reverses all colors of the image.
+<tr> <th>grayscale <td>Converts the image into grayscale.
+<tr> <th>brightness <td>Changes the brightness of the image. Use arg1 to set the level of brightness.
+<tr> <th>contrast <td>Changes the contrast of the image. Use arg1 to set the level of contrast.
+<tr> <th>colorize <td>Like IMG_FILTER_GRAYSCALE, except you can specify the color. Use arg1, arg2 and arg3 in the form of red, blue, green and arg4 for the alpha channel. The range for each color is 0 to 255.
+<tr> <th>edgedetect <td>Uses edge detection to highlight the edges in the image.
+<tr> <th>emboss <td>Embosses the image.
+<tr> <th>gaussian-blur <td>Blurs the image using the Gaussian method.
+<tr> <th>selective-blur <td>Blurs the image.
+<tr> <th>mean-removal <td>Uses mean removal to achieve a "sketchy" effect.
+<tr> <th>smooth <td>Makes the image smoother. Use arg1 to set the level of smoothness.
+<tr> <th>pixelate <td>Applies pixelation effect to the image, use arg1 to set the block size and arg2 to set the pixelation effect mode.
+</table>
 
 ### arg1
-*brightness*: Brightness level.
-*contrast*: Contrast level.
-*colorize*: Value of red component.
-*edgedetect*: Edge detection level.
-*emboss*: Embosses level.
-*gaussian-blur*: Gaussian Blurs level.
-*selective-blur*: Blurs level.
-*mean-removal*: Removal level.
-*smooth*: Smoothness level.
-*pixelate*: Block size in pixels.
+<table>
+<tr> <th>brightness <td>Brightness level.
+<tr> <th>contrast <td>Contrast level.
+<tr> <th>colorize <td>Value of red component.
+<tr> <th>edgedetect <td>Edge detection level.
+<tr> <th>emboss <td>Embosses level.
+<tr> <th>gaussian-blur <td>Gaussian Blurs level.
+<tr> <th>selective-blur <td>Blurs level.
+<tr> <th>mean-removal <td>Removal level.
+<tr> <th>smooth <td>Smoothness level.
+<tr> <th>pixelate <td>Block size in pixels.
+</table>
 
 ### arg2
-*colorize*: Value of green component.
-*pixelate*: Whether to use advanced pixelation effect or not (defaults to FALSE).
+<table>
+<tr> <th>colorize <td>Value of green component.
+<tr> <th>pixelate <td>Whether to use advanced pixelation effect or not (defaults to FALSE).
+</table>
 
 ### arg3
-*colorize*: Value of blue component.
+<table>
+<tr> <th>colorize <td>Value of blue component.
+</table>
 
 ### arg4
-*colorize*: Alpha channel, A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.
+<table>
+<tr> <th>colorize <td>Alpha channel, A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.
+</table>

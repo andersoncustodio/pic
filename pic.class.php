@@ -255,7 +255,7 @@ class Pic {
 	/**
 	 * 
 	 */
-	public function create (&$options = array()) {
+	public function create ($options = array()) {
 		$options = array_merge(array('width' => 600, 'height' => 400,
 			'background' => 'transparent',
 			'opacity' => '100'), $options);
@@ -605,3 +605,5 @@ class Pic {
 		if (file_exists($this->src)) unlink($this->src);
 	}
 }
+
+# vim:noet
