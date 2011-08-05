@@ -136,6 +136,76 @@ class Pic {
 			$this->img['imagecolor'] = imagecolorallocatealpha($this->img['source'],
 				$color[0], $color[1], $color[2], $opacity);
 	}
+
+	/**
+	 * 
+	 */
+	public function background($background = '#FFF') {
+		if ($this->img['background'] == 'transparent') {
+
+			$this->img['background'] = $background;
+
+			$tmp = $this->imagebase($this->img['width'], $this->img['height']);
+
+			imagecopyresampled($tmp, $this->img['source'], 0, 0, 0, 0, $this->img['width'],
+				$this->img['height'], $this->img['width'], $this->img['height']);
+			
+			imagedestroy($this->img['source']);
+
+			$this->img['source'] = $tmp;
+		}
+	}
+
+	/**
+	 * Based on Zebra_Image
+	 * @link http://stefangabos.ro/php-libraries/zebra-image/
+	 */
+	private function imagebase($width, $height) {
+		$base = imagecreatetruecolor($width, $height);
+
+		if ($this->img['format'] == 'png' and $this->img['background'] == 'transparent') {
+			// disable blending
+			imagealphablending($base, false);
+
+			// allocate a transparent color
+			$transparent = imagecolorallocatealpha($base, 0, 0, 0, 127);
+
+			// fill the image with the transparent color
+			imagefill($base, 0, 0, $transparent);
+
+			//save full alpha channel information
+			imagesavealpha($base, true);
+		}
+		
+		elseif ($this->img['format'] == 'gif' and $this->img['background'] == 'transparent'
+			and $this->img['transparent']['color_index'] >= 0) {
+
+			// allocate the source image's transparent color also to the new image resource
+			$transparent_color = imagecolorallocate(
+				$base,
+				$this->img['transparent']['color']['red'],
+				$this->img['transparent']['color']['green'],
+				$this->img['transparent']['color']['blue']
+			);
+
+			// fill the background of the new image with transparent color
+			imagefill($base, 0, 0, $transparent_color);
+
+			// from now on, every pixel having the same RGB as the transparent color will be transparent
+			imagecolortransparent($base, $transparent_color);
+		} else {
+			// convert hex color to rgb
+			$background = $this->hexrgb($this->img['background']);
+
+			// prepare the background color
+			$background_color = imagecolorallocate($base, $background[0], $background[1], $background[2]);
+
+			// fill the image with the background color
+			imagefill($base, 0, 0, $background_color);
+		}
+
+		return $base;
+	}
 	
 	/**
 	 * Redimensionamento com varias opções
@@ -180,19 +250,16 @@ class Pic {
 		}
 		
 		$pos = $this->position($options, array('width' => $width, 'height' => $height));
-		$tmp = imagecreatetruecolor($options['width'], $options['height']);
+		$tmp = $this->imagebase($options['width'], $options['height']);
 
 		imagecopyresampled($tmp, $this->img['source'], -$pos['x'], -$pos['y'],
 			0, 0, $width, $height, $this->img['width'], $this->img['height']);
 		
 		imagedestroy($this->img['source']);
 		
-		$this->img = array(
-			'width' => $options['width'],
-			'height' => $options['height'],
-			'source' => $tmp,
-			'format' => $this->img['format']
-		);
+		$this->img['source'] = $tmp;
+		$this->img['width'] = $options['width'];
+		$this->img['height'] = $options['height'];
 	}
 	
 	/**
@@ -299,12 +366,9 @@ class Pic {
 			$this->img['width'], $this->img['height'], $this->img['width'], $this->img['height']);
 		imagedestroy($this->img['source']);
 		
-		$this->img = array(
-			'source' => $tmp,
-			'width' => $options['width'],
-			'height' => $options['height'],
-			'format' => $this->img['format']
-		);
+		$this->img['source'] = $tmp;
+		$this->img['width'] = $options['width'];
+		$this->img['height'] = $options['height'];
 	}
 
 	/**
@@ -407,29 +471,48 @@ class Pic {
 	 */
 	private function imagecreate($src) {
 		if (!$info = @getimagesize($src)) return false;
+
+		$img = array();
+
+		$img['width'] = $info[0];
+		$img['height'] = $info[1];
 		
-		$format = str_replace(array('.', 'e'), null, image_type_to_extension($info[2]));
+		$img['format'] = str_replace(array('.', 'e'), null, image_type_to_extension($info[2]));
 		
-		switch ($format) {
-			case 'jpg': $img = imagecreatefromjpeg($src); break;
-			case 'png':
-				$img = imagecreatefrompng($src);
-				imagealphablending($img, false);
-				imagesavealpha($img, true);
+		switch ($img['format']) {
+			case 'jpg':
+				$img['source'] = imagecreatefromjpeg($src);
+				$img['background'] = '#FFF';
 			break;
-			case 'gif': $img = imagecreatefromgif($src); break;
+			case 'png':
+				$img['source'] = imagecreatefrompng($src);
+				imagealphablending($img['source'], false);
+				imagesavealpha($img['source'], true);
+				$img['background'] = 'transparent';
+			break;
+			case 'gif':
+				$img['source'] = imagecreatefromgif($src);
+				$img['transparent']['color_index'] = imagecolortransparent($img['source']);
+
+				if ($img['transparent']['color_index'] >= 0) {
+					// get the transparent color's RGB values
+					// we have to mute errors because there are GIF images which *are* transparent and everything
+					// works as expected, but imagecolortransparent() returns a color that is outside the range of
+					// colors in the image's pallette...
+					$img['transparent']['color'] = imagecolorsforindex($img['source'], $img['transparent']['color_index']);
+				}
+
+				$img['background'] = 'transparent';
+
+			break;
 			case 'bmp':
 				require_once PATH_PIC_CLASS . 'imagecreatefrombmp.function.php';
-				$img = imagecreatefrombmp($src);
+				$img['source'] = imagecreatefrombmp($src);
+				$img['background'] = '#FFF';
 			break;
 		}
 		
-		return array(
-			'source' => $img,
-			'width'  => $info[0],
-			'height' => $info[1],
-			'format' => $format
-		);
+		return $img;
 	}
 	
 	/**
@@ -444,6 +527,7 @@ class Pic {
 	 * Reabre a imagem, dando empressão de desfazer todas modificações
 	 */
 	public function reset() {
+		imagedestroy($this->img['source']);
 		$this->open($this->src);
 	}
 	
@@ -591,13 +675,10 @@ class Pic {
 	/**
 	 * Apaga a imagem da memória
 	 */
-	public function clear($img = null) {
-		if ($img == null)
-			imagedestroy($this->img['source']);
-		else
-			imagedestroy($img['source']);
+	public function clear() {
+		imagedestroy($this->img['source']);
 	}
-	
+
 	/**
 	 * Deleta a imagem aberta pelo Pic::open
 	 */

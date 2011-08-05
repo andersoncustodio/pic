@@ -1,5 +1,7 @@
 ## Abrindo e Salvando
 ### Local
+Caso algum diretório ou subdiretório indicado no `Pic::save()` não existir, o mesmo será criado automaticamente.
+
 	$image = new Pic;
 	$image->open('imagem.jpg');
 	$image->save('imagem-local.jpg');
@@ -50,14 +52,12 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 ## Camadas
 
 ### Caminho direto
-
 	$image = new Pic;
 	$image->open('imagem.jpg');
 	$image->layer('logo.png', array('right' => '5px', 'bottom' => '5px'));
 	$image->display();
 
 ### Outra imagem aberta pelo Pic
-
 	$image = new Pic;
 	$image->open('imagem.jpg');
 
@@ -86,6 +86,14 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 	));
 	$image->display();
 
+## Background
+Coloque background em PNG e GIF transparente.
+
+	$image = new Pic;
+	$image->open('imagem.png');
+	$image->background('#FFF'); // Não pode ser usado antes do Pic::open()
+	$image->displa('jpg');
+
 ## Escrever
 	$image = new Pic;
 	$image->open('imagem.jpg');
@@ -98,7 +106,7 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 	));
 	$image->display();
 
-Baixe as fontes que serão usadas e indique o caminho completo, ex: `'font' => 'arial.ttf'`.
+Baixe as fontes que serão usadas e indique o caminho, ex: `'font' => '../fonts/arial.ttf'`.
 
 ## Geometric
 ### Retângulo
