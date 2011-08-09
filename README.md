@@ -54,7 +54,7 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 ### Caminho direto
 	$image = new Pic;
 	$image->open('imagem.jpg');
-	$image->layer('logo.png', array('right' => '5px', 'bottom' => '5px'));
+	$image->layer('logo.png', array('right' => '5px', 'bottom' => '5px', 'opacity' => '50'));
 	$image->display();
 
 ### Outra imagem aberta pelo Pic
@@ -64,7 +64,9 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 	$layer = new Pic;
 	$layer->open('logo.jpg');
 
-	$image->layer($layer->img, array('left' => '5px', 'top' => '5px'));
+	$image->layer($layer->img, array('left' => '5px', 'top' => '5px', 'opacity' => '50'));
+
+	$layer->clean();
 
 	$image->display();
 

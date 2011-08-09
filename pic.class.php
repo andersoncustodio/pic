@@ -463,7 +463,7 @@ class Pic {
 			imagecopymerge($this->img['source'], $img['source'], $pos['x'], $pos['y'],
 				0, 0, $img['width'], $img['height'], $options['opacity']);
 		
-		imagedestroy($img['source']);
+		if (!is_array($src)) imagedestroy($img['source']);
 	}
 	
 	/**
