@@ -1,5 +1,10 @@
 <?php
 /**
+ * PIC - [P]HP [I]MG [C]SS
+ *
+ * Com poucas linhas de código você abre e edita imagens com PHP
+ * de forma simples e rápida usando comandos CSS.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -14,19 +19,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * Copyright (C) Anderson Custódio de Oliveira (@acustodioo), 2011
- */
-
-/**
- * PIC - [P]HP [I]MG [C]SS
- *
- * Com poucas linhas de código você abre e edita imagens com PHP
- * de forma simples e rápida usando comandos CSS.
- *
+ * @copyright (C) Anderson Custódio de Oliveira (@acustodioo), 2011
  * @author Anderson Custódio de Oliveira <acustodioo@gmail.com>
  * @link https://github.com/acustodioo/pic
+ *
  */
- 
+
 define('PATH_PIC_CLASS', dirname(__FILE__) . '/');
 
 class Pic {
@@ -157,30 +155,23 @@ class Pic {
 	}
 
 	/**
-	 * Based on Zebra_Image
+	 * @link http://php.net/manual/en/function.imagesavealpha.php
 	 * @link http://stefangabos.ro/php-libraries/zebra-image/
 	 */
 	private function imagebase($width, $height) {
 		$base = imagecreatetruecolor($width, $height);
 
 		if ($this->img['format'] == 'png' and $this->img['background'] == 'transparent') {
-			// disable blending
 			imagealphablending($base, false);
 
-			// allocate a transparent color
 			$transparent = imagecolorallocatealpha($base, 0, 0, 0, 127);
-
-			// fill the image with the transparent color
 			imagefill($base, 0, 0, $transparent);
-
-			//save full alpha channel information
 			imagesavealpha($base, true);
 		}
 		
 		elseif ($this->img['format'] == 'gif' and $this->img['background'] == 'transparent'
 			and $this->img['transparent']['color_index'] >= 0) {
 
-			// allocate the source image's transparent color also to the new image resource
 			$transparent_color = imagecolorallocate(
 				$base,
 				$this->img['transparent']['color']['red'],
@@ -188,20 +179,14 @@ class Pic {
 				$this->img['transparent']['color']['blue']
 			);
 
-			// fill the background of the new image with transparent color
 			imagefill($base, 0, 0, $transparent_color);
-
-			// from now on, every pixel having the same RGB as the transparent color will be transparent
 			imagecolortransparent($base, $transparent_color);
-		} else {
-			// convert hex color to rgb
+		}
+		
+		else {
 			$background = $this->hexrgb($this->img['background']);
-
-			// prepare the background color
-			$background_color = imagecolorallocate($base, $background[0], $background[1], $background[2]);
-
-			// fill the image with the background color
-			imagefill($base, 0, 0, $background_color);
+			$background = imagecolorallocate($base, $background[0], $background[1], $background[2]);
+			imagefill($base, 0, 0, $background);
 		}
 
 		return $base;
@@ -238,13 +223,13 @@ class Pic {
 		$width = $options['width'];
 		$height = $options['height'];
 		
-		// Verifico se tem algum tamanho mínimo ou máximo a ser seguido no corte
+		// Verifico se tem algum tamanho mínimo ou máximo a ser seguido
 		if (isset($options['max-height'])) {
 			$this->pixel($options['max-height'], $this->img['height']);
 			if ($height > $options['max-height']) $options['height'] = $options['max-height'];
 		}
 		
-		if (isset($options['max-width'])) {
+		elseif (isset($options['max-width'])) {
 			$this->pixel($options['max-width'], $this->img['width']);
 			if ($width > $options['max-width']) $options['width'] = $options['max-width'];
 		}
@@ -320,37 +305,7 @@ class Pic {
 	}
 	
 	/**
-	 * 
-	 */
-	public function create ($options = array()) {
-		$options = array_merge(array('width' => 600, 'height' => 400,
-			'background' => 'transparent',
-			'opacity' => '100'), $options);
-		
-		$options['width'] = (int) $options['width'];
-		$options['height'] = (int) $options['height'];
-
-		$this->img = array(
-			'source' => imagecreatetruecolor($options['width'], $options['height']),
-			'width' => $options['width'],
-			'height' => $options['height'],
-			'format' => 'png'
-		);
-		
-		if ($options['background'] == 'transparent') {
-			$options['background'] = '#000000';
-			$this->imagecolor($options);
-			imagecolortransparent($this->img['source'], $this->img['imagecolor']);
-		} else {
-			$this->imagecolor($options);
-			imagefill($this->img['source'], 10, 10, $this->img['imagecolor']);
-		}
-
-		unset($this->img['imagecolor']);
-	}
-	
-	/**
-	 * Corta imagem tamanho e local especifico
+	 * Corta imagem com tamanho e local especifico
 	 */
 	public function crop($options = array()) {
 		$options = array_merge(array('width' => $this->img['width'],
@@ -464,6 +419,8 @@ class Pic {
 				0, 0, $img['width'], $img['height'], $options['opacity']);
 		
 		if (!is_array($src)) imagedestroy($img['source']);
+
+		return true;
 	}
 	
 	/**
@@ -494,13 +451,8 @@ class Pic {
 				$img['source'] = imagecreatefromgif($src);
 				$img['transparent']['color_index'] = imagecolortransparent($img['source']);
 
-				if ($img['transparent']['color_index'] >= 0) {
-					// get the transparent color's RGB values
-					// we have to mute errors because there are GIF images which *are* transparent and everything
-					// works as expected, but imagecolortransparent() returns a color that is outside the range of
-					// colors in the image's pallette...
+				if ($img['transparent']['color_index'] >= 0)
 					$img['transparent']['color'] = imagecolorsforindex($img['source'], $img['transparent']['color_index']);
-				}
 
 				$img['background'] = 'transparent';
 

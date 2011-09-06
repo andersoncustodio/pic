@@ -6,7 +6,7 @@ Caso algum diretório ou subdiretório indicado no `Pic::save()` não existir, o
 	$image->open('imagem.jpg');
 	$image->save('imagem-local.jpg');
 	$image->clear(); // Apago a imagem da memória
-	
+
 ### Externa
 	$image = new Pic;
 	$image->open('http://example.com/imagem.jpg');
@@ -19,7 +19,7 @@ Caso algum diretório ou subdiretório indicado no `Pic::save()` não existir, o
 	$image->clear(); // Apago a imagem da memória
 	$image->delete(); // Apago a imagem original
 
-Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este é só um exemplo de como usar os métodos.
+É possível fundir outros arquivos com uma imagem, usando o `Pic::save()` você garante que só está sendo salvo dados necessários da imagem.
 
 ## Mostrar na tela
 	$image = new Pic;
@@ -37,7 +37,9 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 	$image->photo(array('width' => '600', 'height' => '400px', 'overflow' => 'hidden'));
 	$image->display();
 
-## Imagem com largura e altura fixa
+Se a altura for maior que a largura as mesmas são invertidas.
+
+## Imagem com largura fixa e altura limitada
 	$image = new Pic;
 	$image->open('imagem.jpg');
 	$image->resize(array('width' => '200px', 'max-height' => '350px'));
@@ -50,7 +52,6 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 	$image->display();
 
 ## Camadas
-
 ### Caminho direto
 	$image = new Pic;
 	$image->open('imagem.jpg');
@@ -66,7 +67,7 @@ Se não houver modificações na imagem a melhor coisa a fazer é movê-la, este
 
 	$image->layer($layer->img, array('left' => '5px', 'top' => '5px', 'opacity' => '50'));
 
-	$layer->clean();
+	$layer->clear();
 
 	$image->display();
 
@@ -176,3 +177,5 @@ $this->filter($filtertype [, int $arg1 [, int $arg2 [, int $arg3 [, int $arg4 ]]
 <table>
 <tr> <th>colorize <td>Alpha channel, A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.
 </table>
+
+<!-- vim:noet -->
