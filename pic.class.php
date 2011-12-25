@@ -2,7 +2,7 @@
 /**
  * PIC - [P]HP [I]MG [C]SS
  *
- * Com poucas linhas de código você abre e edita imagens com PHP
+ * Com poucas linhas de código você abre, edita e salva imagens com PHP
  * de forma simples e rápida usando comandos CSS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,26 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * @copyright (C) Anderson Custódio de Oliveira (@acustodioo), 2011
- * @author Anderson Custódio de Oliveira <acustodioo@gmail.com>
- * @link https://github.com/acustodioo/pic
- *
+ * @copyright (C) Anderson C. Oliveira <acustodioo@gmail.com>, 2011
  */
 
 define('PATH_PIC_CLASS', dirname(__FILE__) . '/');
 
 class Pic {
-	
+
 	/**
 	 * Source e informações da imagem
 	 */
 	public $img = array();
-	
+
 	/**
 	 * Caminho da imagem original
 	 */
 	private $src = null;
-	
+
 	/**
 	 * Formatos permititos
 	 */
@@ -68,36 +65,38 @@ class Pic {
 	);
 
 	/**
-	 * 
+	 *
 	 */
 	private function position ($options = array(), $base = array()) {
 		$pos = array('x' => 0, 'y' => 0);
-		
+
 		// Definição da posição X, estilo CSS usando position absolute: left ou right
 		if ((isset($options['left']) and $options['left'] == 'auto')
 			or (isset($options['right']) and $options['right'] == 'auto'))
 			$pos['x'] = (($base['width'] - $options['width']) / 2);
-		
+
 		elseif (isset($options['left']))
-			$pos['x'] =  (int) $options['left'];
-		
+			$pos['x'] = $this->pixel($options['left'], $this->img['width']);
+
 		elseif(isset($options['right']))
-			$pos['x'] = ($base['width'] - $options['width'] -  (int) $options['right']);
-			
+			$pos['x'] = ($base['width'] - $options['width']
+			- $this->pixel($options['right'], $this->img['width']));
+
 		// Definição da posição Y, estilo CSS usando position absolute: top ou bottom
 		if ((isset($options['top']) and $options['top'] == 'auto')
 			or (isset($options['bottom']) and $options['bottom'] == 'auto'))
 			$pos['y'] = (($base['height'] - $options['height']) / 2);
-			
+
 		elseif (isset($options['top']))
-			$pos['y'] =  (int) $options['top'];
-		
+			$pos['y'] = $this->pixel($options['top'], $this->img['width']);
+
 		elseif (isset($options['bottom']))
-			$pos['y'] = ($base['height'] - $options['height'] -  (int) $options['bottom']);
-		
+			$pos['y'] = ($base['height'] - $options['height']
+			- $this->pixel($options['bottom'],$this->img['width']));
+
 		return $pos;
 	}
-	
+
 	/**
 	 * Color
 	 * @link http://www.php.net/manual/en/ref.image.php#63064
@@ -108,25 +107,29 @@ class Pic {
 		if (strlen($color) == 3) $color .= $color;
 		return array_map('hexdec', explode('|', wordwrap($color, 2, '|', 1)));
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private function pixel (&$unid = null, $measure = null) {
 		if (!is_numeric($unid)) {
-			if (strrpos($unid, '%'))
-				$unid = (int) ($measure * ((int) $unid / 100));
-			else
+			if (strpos($unid, 'px'))
 				$unid = (int) $unid;
+			elseif (strpos($unid, '%'))
+				$unid = round($measure * ((float) $unid * 0.01));
+			elseif (strpos($unid, 'em'))
+				$unid = round($measure * (float) $unid);
 		}
+
+		return $unid;
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private function imagecolor ($options) {
 		if ($options['opacity'] <= 100)
-			$opacity = (100 - $options['opacity']) * (127 / 100);
+			$opacity = (100 - $options['opacity']) * 1.27;
 		else
 			$opacity = 0;
 
@@ -136,7 +139,7 @@ class Pic {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public function background($background = '#FFF') {
 		if ($this->img['background'] == 'transparent') {
@@ -147,7 +150,7 @@ class Pic {
 
 			imagecopyresampled($tmp, $this->img['source'], 0, 0, 0, 0, $this->img['width'],
 				$this->img['height'], $this->img['width'], $this->img['height']);
-			
+
 			imagedestroy($this->img['source']);
 
 			$this->img['source'] = $tmp;
@@ -168,7 +171,7 @@ class Pic {
 			imagefill($base, 0, 0, $transparent);
 			imagesavealpha($base, true);
 		}
-		
+
 		elseif ($this->img['format'] == 'gif' and $this->img['background'] == 'transparent'
 			and $this->img['transparent']['color_index'] >= 0) {
 
@@ -182,7 +185,7 @@ class Pic {
 			imagefill($base, 0, 0, $transparent_color);
 			imagecolortransparent($base, $transparent_color);
 		}
-		
+
 		else {
 			$background = $this->hexrgb($this->img['background']);
 			$background = imagecolorallocate($base, $background[0], $background[1], $background[2]);
@@ -191,7 +194,7 @@ class Pic {
 
 		return $base;
 	}
-	
+
 	/**
 	 * Redimensionamento com varias opções
 	 */
@@ -201,13 +204,13 @@ class Pic {
 			$this->pixel($options['width'], $this->img['width']);
 			$options['height'] = floor($this->img['height'] / ($this->img['width'] / $options['width']));
 		}
-		
+
 		// Se definir só a altura reajusto o valor da largunra para manter a proporção
 		elseif (isset($options['height']) and !isset($options['width'])) {
 			$this->pixel($options['height'], $this->img['height']);
 			$options['width'] = floor($this->img['width'] / ($this->img['height'] / $options['height']));
 		}
-		
+
 		// Se os dois foram definidos redimensiono como desejado
 		elseif (isset($options['height']) and isset($options['width'])) {
 			$this->pixel($options['width'], $this->img['width']);
@@ -219,61 +222,61 @@ class Pic {
 			$options['width'] = $this->img['width'];
 			$options['height'] = $this->img['height'];
 		}
-		
+
 		$width = $options['width'];
 		$height = $options['height'];
-		
+
 		// Verifico se tem algum tamanho mínimo ou máximo a ser seguido
 		if (isset($options['max-height'])) {
 			$this->pixel($options['max-height'], $this->img['height']);
 			if ($height > $options['max-height']) $options['height'] = $options['max-height'];
 		}
-		
+
 		elseif (isset($options['max-width'])) {
 			$this->pixel($options['max-width'], $this->img['width']);
 			if ($width > $options['max-width']) $options['width'] = $options['max-width'];
 		}
-		
+
 		$pos = $this->position($options, array('width' => $width, 'height' => $height));
 		$tmp = $this->imagebase($options['width'], $options['height']);
 
 		imagecopyresampled($tmp, $this->img['source'], -$pos['x'], -$pos['y'],
 			0, 0, $width, $height, $this->img['width'], $this->img['height']);
-		
+
 		imagedestroy($this->img['source']);
-		
+
 		$this->img['source'] = $tmp;
 		$this->img['width'] = $options['width'];
 		$this->img['height'] = $options['height'];
 	}
-	
+
 	/**
 	 * Se a imagem for maior na vertical inverte a largura com a altura, bom para fotos
 	 */
 	public function photo ($options = array()) {
 		$options = array_merge(array('width' => 600, 'height' => 400,
 			'overflow' => 'hidden'), $options);
-		
+
 		if ($this->img['width'] > $this->img['height']) {
 			if ($options['overflow'] == 'hidden')
 				$options['max-height'] =  $options['height'];
-			
+
 			unset($options['height']);
 		}
-		
+
 		elseif ($this->img['width'] < $this->img['height']) {
 			$options = array_merge($options, array('width' => $options['height'],
 				'height' => $options['width']));
-			
+
 			if ($options['overflow'] == 'hidden')
 				$options['max-width'] = $options['width'];
-			
+
 			unset($options['width']);
 		}
-		
+
 		$this->resize($options);
 	}
-	
+
 	/**
 	 *
 	 */
@@ -284,7 +287,7 @@ class Pic {
 				for($i = 0; $i < $this->img['height']; $i++)
 					imagecopy($tmp, $this->img['source'], 0, ($this->img['height'] - $i - 1),
 						0, $i, $this->img['width'], 1);
-				
+
 				imagedestroy($this->img['source']);
 				$this->img['source'] = $tmp;
 			break;
@@ -292,7 +295,7 @@ class Pic {
 				for($i = 0; $i < $this->img['width']; $i++)
 					imagecopy($tmp, $this->img['source'], ($this->img['width'] - $i - 1),
 						0, $i, 0, 1, $this->img['height']);
-				
+
 				imagedestroy($this->img['source']);
 				$this->img['source'] = $tmp;
 			break;
@@ -303,24 +306,24 @@ class Pic {
 			break;
 		}
 	}
-	
+
 	/**
 	 * Corta imagem com tamanho e local especifico
 	 */
 	public function crop($options = array()) {
 		$options = array_merge(array('width' => $this->img['width'],
 			'height' => $this->img['height']), $options);
-		
+
 		$this->pixel($options['width'], $this->img['width']);
 		$this->pixel($options['height'], $this->img['height']);
-		
+
 		$pos = $this->position($options, $this->img);
-		
+
 		$tmp = imagecreatetruecolor($options['width'], $options['height']);
 		imagecopyresampled($tmp, $this->img['source'], 0, 0, $pos['x'], $pos['y'],
 			$this->img['width'], $this->img['height'], $this->img['width'], $this->img['height']);
 		imagedestroy($this->img['source']);
-		
+
 		$this->img['source'] = $tmp;
 		$this->img['width'] = $options['width'];
 		$this->img['height'] = $options['height'];
@@ -336,7 +339,7 @@ class Pic {
 		$string = utf8_decode($string);
 		$this->pixel($options['size'], $this->img['height']);
 
-		$bbox = imagettfbbox($options['size'], 0, $options['font'], $string);
+		$bbox = imagettfbbox($options['size'], 0, './' . $options['font'], $string);
 		$options['width'] = $bbox[2];
 		$options['height'] = $options['size'];
 
@@ -350,18 +353,18 @@ class Pic {
 		$this->imagecolor($options);
 
 		imagettftext($this->img['source'], $options['size'], $options['rotate'],
-			$pos['x'], $pos['y'], $this->img['imagecolor'], $options['font'], $string);
+			$pos['x'], $pos['y'], $this->img['imagecolor'], './' . $options['font'], $string);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	public function thumbnail($options = array()) {
 		$options = array_merge(array('width' => 90, 'height' => 90), $options);
-		
+
 		$this->pixel($options['width'], $this->img['width']);
 		$this->pixel($options['height'], $this->img['height']);
-		
+
 		if (floor($this->img['width'] / ($this->img['height'] / $options['height'])) < $options['width']) {
 			$options['max-height'] = $options['height'];
 			unset($options['height']);
@@ -372,7 +375,7 @@ class Pic {
 
 		$this->resize($options);
 	}
-	
+
 	/**
 	 * Gira a imagem
 	 */
@@ -388,7 +391,7 @@ class Pic {
 		$this->img['width'] = imagesx($this->img['source']);
 		$this->img['height'] = imagesy($this->img['source']);
 	}
-	
+
 	/**
 	 *
 	 */
@@ -397,32 +400,32 @@ class Pic {
 			$img = $src;
 		else
 			$img = $this->imagecreate($src);
-		
+
 		if (!$img) return false;
 
 		$options = array_merge(array('opacity' => 100), $options);
-	
+
 		$options['width'] = $img['width'];
 		$options['height'] = $img['height'];
-		
+
 		$pos = $this->position($options, $this->img);
 
 		if ($img['format'] == 'png') {
 			require_once PATH_PIC_CLASS . 'imagecopymerge_alpha.function.php';
-			
+
 			imagecopymerge_alpha($this->img['source'], $img['source'], $pos['x'],
 				$pos['y'], 0, 0, $img['width'], $img['height'], $options['opacity']);
 		}
-		
+
 		else
 			imagecopymerge($this->img['source'], $img['source'], $pos['x'], $pos['y'],
 				0, 0, $img['width'], $img['height'], $options['opacity']);
-		
+
 		if (!is_array($src)) imagedestroy($img['source']);
 
 		return true;
 	}
-	
+
 	/**
 	 * Imagecreate
 	 */
@@ -433,9 +436,9 @@ class Pic {
 
 		$img['width'] = $info[0];
 		$img['height'] = $info[1];
-		
+
 		$img['format'] = str_replace(array('.', 'e'), null, image_type_to_extension($info[2]));
-		
+
 		switch ($img['format']) {
 			case 'jpg':
 				$img['source'] = imagecreatefromjpeg($src);
@@ -463,10 +466,10 @@ class Pic {
 				$img['background'] = '#FFF';
 			break;
 		}
-		
+
 		return $img;
 	}
-	
+
 	/**
 	 * Abre imagem para edição
 	 */
@@ -474,7 +477,7 @@ class Pic {
 		if (!is_null($src)) $this->src = $src;
 		if ($this->img = $this->imagecreate($src)) return true;
 	}
-	
+
 	/**
 	 * Reabre a imagem, dando empressão de desfazer todas modificações
 	 */
@@ -482,34 +485,34 @@ class Pic {
 		imagedestroy($this->img['source']);
 		$this->open($this->src);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private function filter_name($name = null) {
 		$default = 'image.' . $this->img['format'];
-		
+
 		if(!is_null($name)) {
 			$format = strtolower(str_replace('.', null, strrchr($name, '.')));
-			
+
 			if (isset($this->mime[$format]))
 				$this->img['format'] = $format;
 			else
 				$name .= '.' . $this->img['format'];
 		}
-		
+
 		else
 			$name = $default;
-		
+
 		return $name;
 	}
-	
+
 	/**
 	 * Image
 	 */
 	private function image($save = null, $qualite = 90) {
 		imageinterlace($this->img['source'], true);
-		
+
 		switch ($this->img['format']) {
 			case 'jpg': imagejpeg($this->img['source'], $save, $qualite); break;
 			case 'png': imagepng($this->img['source'], $save); break;
@@ -522,28 +525,28 @@ class Pic {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public function filter ($filtertype = null, $arg1 = null, $arg2 = null, $arg3 = null, $arg4 = null) {
 		switch ($this->filters[$filtertype]) {
 			case IMG_FILTER_COLORIZE:
 				imagefilter($this->img['source'], $this->filters[$filtertype], $arg1, $arg2, $arg3, $arg4);
 			break;
-			
+
 			case IMG_FILTER_PIXELATE:
 				imagefilter($this->img['source'], $this->filters[$filtertype], $arg1, $arg2);
 			break;
-			
+
 			case IMG_FILTER_BRIGHTNESS:
 			case IMG_FILTER_CONTRAST:
 			case IMG_FILTER_SMOOTH:
 				imagefilter($this->img['source'], $this->filters[$filtertype], $arg1);
 			break;
-			
+
 			case IMG_FILTER_NEGATE:
 				imagefilter($this->img['source'], $this->filters[$filtertype]);
 			break;
-			
+
 			default:
 				if (is_null($arg1)) $arg1 = 1;
 
@@ -554,20 +557,20 @@ class Pic {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public function geometric($geometric = null, $options = array()) {
 		switch ($geometric) {
 			case 'rectangle':
 				$options = array_merge(array('width' => '50%', 'height' => '50%',
-					'background' => '#FFF', 'opacity' => 100), $options); 
+					'background' => '#FFF', 'opacity' => 100), $options);
 
 				$this->pixel($options['width'], $this->img['width']);
 				$this->pixel($options['height'], $this->img['height']);
 
 				$pos = $this->position($options, $this->img);
 				$this->imagecolor($options);
-				
+
 				imagefilledrectangle($this->img['source'], $pos['x'], $pos['y'],
 					$pos['x'] + $options['width'], $pos['y'] + $options['height'],
 					$this->img['imagecolor']);
@@ -576,7 +579,7 @@ class Pic {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public function efect($efect = null) {
 		switch ($efect) {
@@ -613,7 +616,7 @@ class Pic {
 		imagedestroy($this->img['source']);
 		exit;
 	}
-	
+
 	/**
 	 * Salva imagem
 	 */
