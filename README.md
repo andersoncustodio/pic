@@ -124,10 +124,10 @@ Baixe as fontes que serão usadas e indique o caminho, ex: `'font' => '../fonts/
 
 ## Efeitos
 ### Transformar em desenho.
-	$image->efect('drawing');
+	$image->effect('drawing');
 
 ### Sepia
-	$image->efect('sepia');
+	$image->effect('sepia');
 
 ## Filtros
 $this->filter($filtertype [, int $arg1 [, int $arg2 [, int $arg3 [, int $arg4 ]]]]);

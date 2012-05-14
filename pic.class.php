@@ -50,19 +50,25 @@ class Pic {
 	 * Atalhos amigáveis para os filtros
 	 */
 	private $filters = array(
-		'negate' => IMG_FILTER_NEGATE,
-		'grayscale' => IMG_FILTER_GRAYSCALE,
-		'brightness' => IMG_FILTER_BRIGHTNESS,
-		'contrast' => IMG_FILTER_CONTRAST,
-		'colorize' => IMG_FILTER_COLORIZE,
-		'edgedetect' => IMG_FILTER_EDGEDETECT,
-		'emboss' => IMG_FILTER_EMBOSS,
-		'gaussian-blur' => IMG_FILTER_GAUSSIAN_BLUR,
-		'selective-blur' => IMG_FILTER_SELECTIVE_BLUR,
-		'mean-removal' => IMG_FILTER_MEAN_REMOVAL,
-		'smooth' => IMG_FILTER_SMOOTH,
-		'pixelate' => IMG_FILTER_PIXELATE
+		'negate' => 0,            # IMG_FILTER_NEGATE
+		'grayscale' => 1,         # IMG_FILTER_GRAYSCALE
+		'brightness' => 2,        # IMG_FILTER_BRIGHTNESS
+		'contrast' => 3,          # IMG_FILTER_CONTRAST
+		'colorize' => 4,          # IMG_FILTER_COLORIZE
+		'edgedetect' => 5,        # IMG_FILTER_EDGEDETECT
+		'emboss' => 6,            # IMG_FILTER_EMBOSS
+		'gaussian-blur' => 7,     # IMG_FILTER_GAUSSIAN_BLUR
+		'selective-blur' => 8,    # IMG_FILTER_SELECTIVE_BLUR
+		'mean-removal' => 9,      # IMG_FILTER_MEAN_REMOVAL
+		'smooth' => 10,           # IMG_FILTER_SMOOTH
+		'pixelate' => 11          # IMG_FILTER_PIXELATE
 	);
+
+
+	public function Pic($src = null)
+	{
+		if ($src != null) $this->open($src);
+	}
 
 	/**
 	 *
@@ -70,29 +76,27 @@ class Pic {
 	private function position ($options = array(), $base = array()) {
 		$pos = array('x' => 0, 'y' => 0);
 
-		// Definição da posição X, estilo CSS usando position absolute: left ou right
+		// Defino a posição X (left ou right)
 		if ((isset($options['left']) and $options['left'] == 'auto')
 			or (isset($options['right']) and $options['right'] == 'auto'))
 			$pos['x'] = (($base['width'] - $options['width']) / 2);
 
 		elseif (isset($options['left']))
-			$pos['x'] = $this->pixel($options['left'], $this->img['width']);
+			$pos['x'] =  (int) $options['left'];
 
 		elseif(isset($options['right']))
-			$pos['x'] = ($base['width'] - $options['width']
-			- $this->pixel($options['right'], $this->img['width']));
+			$pos['x'] = ($base['width'] - $options['width'] -  (int) $options['right']);
 
-		// Definição da posição Y, estilo CSS usando position absolute: top ou bottom
+		// Defino a posição Y (top ou bottom)
 		if ((isset($options['top']) and $options['top'] == 'auto')
 			or (isset($options['bottom']) and $options['bottom'] == 'auto'))
 			$pos['y'] = (($base['height'] - $options['height']) / 2);
 
 		elseif (isset($options['top']))
-			$pos['y'] = $this->pixel($options['top'], $this->img['width']);
+			$pos['y'] =  (int) $options['top'];
 
 		elseif (isset($options['bottom']))
-			$pos['y'] = ($base['height'] - $options['height']
-			- $this->pixel($options['bottom'],$this->img['width']));
+			$pos['y'] = ($base['height'] - $options['height'] -  (int) $options['bottom']);
 
 		return $pos;
 	}
@@ -120,8 +124,6 @@ class Pic {
 			elseif (strpos($unid, 'em'))
 				$unid = round($measure * (float) $unid);
 		}
-
-		return $unid;
 	}
 
 	/**
@@ -205,7 +207,7 @@ class Pic {
 			$options['height'] = floor($this->img['height'] / ($this->img['width'] / $options['width']));
 		}
 
-		// Se definir só a altura reajusto o valor da largunra para manter a proporção
+		// Se definir só a altura reajusto o valor da largura para manter a proporção
 		elseif (isset($options['height']) and !isset($options['width'])) {
 			$this->pixel($options['height'], $this->img['height']);
 			$options['width'] = floor($this->img['width'] / ($this->img['height'] / $options['height']));
@@ -217,7 +219,7 @@ class Pic {
 			$this->pixel($options['height'], $this->img['height']);
 		}
 
-		// Se nenhum foi definido, matenho o tamanho atual
+		// Se nenhum foi definido, mantenho o tamanho atual
 		else {
 			$options['width'] = $this->img['width'];
 			$options['height'] = $this->img['height'];
@@ -581,8 +583,8 @@ class Pic {
 	/**
 	 *
 	 */
-	public function efect($efect = null) {
-		switch ($efect) {
+	public function effect($effect = null) {
+		switch ($effect) {
 			case 'sepia':
 				$this->filter('grayscale');
 				$this->filter('colorize', 90, 60, 40);
@@ -641,5 +643,3 @@ class Pic {
 		if (file_exists($this->src)) unlink($this->src);
 	}
 }
-
-# vim:noet
