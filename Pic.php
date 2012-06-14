@@ -200,7 +200,8 @@ class Pic {
     /**
     * Redimensionamento com varias opções
     */
-    public function resize ($options = array()) {
+    public function resize(array $options)
+    {
         // Se definir só a largura reajusto o valor da altura para manter a proporção
         if (isset($options['width']) and !isset($options['height'])) {
             $this->pixel($options['width'], $this->img['width']);
@@ -228,15 +229,15 @@ class Pic {
         $width = $options['width'];
         $height = $options['height'];
 
-        // Verifico se tem algum tamanho mínimo ou máximo a ser seguido
-        if (isset($options['max-height'])) {
-            $this->pixel($options['max-height'], $this->img['height']);
-            if ($height > $options['max-height']) $options['height'] = $options['max-height'];
+        // Verifico se foi definido algum limiete para o canvas
+        if (isset($options['canvas-height'])) {
+            $this->pixel($options['canvas-height'], $this->img['height']);
+            if ($height > $options['canvas-height']) $options['height'] = $options['canvas-height'];
         }
 
-        elseif (isset($options['max-width'])) {
-            $this->pixel($options['max-width'], $this->img['width']);
-            if ($width > $options['max-width']) $options['width'] = $options['max-width'];
+        elseif (isset($options['canvas-width'])) {
+            $this->pixel($options['canvas-width'], $this->img['width']);
+            if ($width > $options['canvas-width']) $options['width'] = $options['canvas-width'];
         }
 
         $pos = $this->position($options, array('width' => $width, 'height' => $height));
@@ -261,7 +262,7 @@ class Pic {
 
         if ($this->img['width'] > $this->img['height']) {
             if ($options['overflow'] == 'hidden')
-                $options['max-height'] =  $options['height'];
+                $options['canvas-height'] =  $options['height'];
 
             unset($options['height']);
         }
@@ -271,7 +272,7 @@ class Pic {
                 'height' => $options['width']));
 
             if ($options['overflow'] == 'hidden')
-                $options['max-width'] = $options['width'];
+                $options['canvas-width'] = $options['width'];
 
             unset($options['width']);
         }
@@ -368,10 +369,10 @@ class Pic {
         $this->pixel($options['height'], $this->img['height']);
 
         if (floor($this->img['width'] / ($this->img['height'] / $options['height'])) < $options['width']) {
-            $options['max-height'] = $options['height'];
+            $options['canvas-height'] = $options['height'];
             unset($options['height']);
         } else {
-            $options['max-width'] = $options['width'];
+            $options['canvas-width'] = $options['width'];
             unset($options['width']);
         }
 

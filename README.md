@@ -39,10 +39,10 @@ Caso algum diretório ou subdiretório indicado no `Pic::save()` não existir, o
 
 Se a altura for maior que a largura as mesmas são invertidas.
 
-## Imagem com largura fixa e altura limitada
+## Imagem com largura fixa e altura limitada mantendo a proporção
 	$image = new Pic;
 	$image->open('imagem.jpg');
-	$image->resize(array('width' => '200px', 'max-height' => '350px'));
+	$image->resize(array('width' => '200px', 'canvas-height' => '350px'));
 	$image->display();
 
 ## Avatar com medida fixa
