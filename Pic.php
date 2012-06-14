@@ -485,7 +485,7 @@ class Pic {
     */
     public function reset() {
         imagedestroy($this->img['source']);
-        $this->open($this->src);
+        return $this->open($this->src);
     }
 
     /**
@@ -516,12 +516,12 @@ class Pic {
         imageinterlace($this->img['source'], true);
 
         switch ($this->img['format']) {
-            case 'jpg': imagejpeg($this->img['source'], $save, $qualite); break;
-            case 'png': imagepng($this->img['source'], $save); break;
-            case 'gif': imagegif($this->img['source'], $save); break;
+            case 'jpg': return imagejpeg($this->img['source'], $save, $qualite); break;
+            case 'png': return imagepng($this->img['source'], $save); break;
+            case 'gif': return imagegif($this->img['source'], $save); break;
             case 'bmp':
                 require_once PATH_PIC_CLASS . 'imagebmp.function.php';
-                imagebmp($this->img['source'], $save);
+                return imagebmp($this->img['source'], $save);
             break;
         }
     }
@@ -612,9 +612,11 @@ class Pic {
     * Download da imagem
     */
     public function download($name = null, $qualite = 90) {
+        $name = $this->filter_name($name);
         header('Content-type: ' . $this->mime[$this->img['format']]);
-        header('Content-Disposition: attachment; filename="' . $this->filter_name($name) . '"');
-        readfile($this->image(null, $qualite));
+        header('Content-Disposition: attachment; filename="' . $name . '"');
+        $this->image(null, $qualite);
+        readfile($name);
         imagedestroy($this->img['source']);
         exit;
     }

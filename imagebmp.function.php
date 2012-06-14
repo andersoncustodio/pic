@@ -44,7 +44,8 @@ function imagebmp(&$img, $filename = false) {
 			}
 			fwrite($f, $wid_pad);
 		}
-		fclose($f);
+
+		return fclose($f);
 	}
 	
 	else {
@@ -60,6 +61,8 @@ function imagebmp(&$img, $filename = false) {
 			}
 			echo $wid_pad;
 		}
+
+		return true;
 	}
 }
 
