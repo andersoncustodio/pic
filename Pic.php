@@ -433,7 +433,10 @@ class Pic {
     * Imagecreate
     */
     private function imagecreate($src) {
-        if (!$info = @getimagesize($src)) return false;
+        $info = @getimagesize($src);
+
+        if (!in_array($info['mime'], $this->mime))
+            return false;
 
         $img = array();
 
