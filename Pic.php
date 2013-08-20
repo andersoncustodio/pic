@@ -22,7 +22,7 @@
  * @copyright (C) Anderson C. Oliveira <acustodioo@gmail.com>, 2011
  */
 
-define('PATH_PIC_CLASS', dirname(__FILE__) . '/');
+define('PATH_PIC_CLASS', dirname(__FILE__) . '/functions');
 
 class Pic {
 
